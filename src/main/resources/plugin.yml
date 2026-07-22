@@ -1,0 +1,41 @@
+name: RealWorld
+version: 1.0
+author: rxdwan
+description: A manual crime, bounty, and jail system for Minecraft servers. Admins charge crimes, players enforce the law with citizen's arrest cuffs.
+main: com.rxdwan.realworld.RealWorldPlugin
+api-version: 1.21
+softdepend: [Vault]
+
+commands:
+  wantedlist:
+    description: View all wanted criminals
+    permission: realworld.commands
+  inmates:
+    description: View all jailed criminals
+    permission: realworld.commands
+  chargecrime:
+    description: Charge a player with a crime
+    permission: realworld.admin
+  pardon:
+    description: Pardon a wanted player
+    permission: realworld.admin
+  cuffs:
+    description: Get citizen arrest cuffs
+    permission: realworld.commands
+  bail:
+    description: Pay bail to get out of jail
+    permission: realworld.commands
+  realworld:
+    description: RealWorld plugin info
+    permission: realworld.commands
+  crimelog:
+    description: View the crime log
+    permission: realworld.admin
+
+permissions:
+  realworld.commands:
+    description: Access to all standard player commands
+    default: true
+  realworld.admin:
+    description: Access to all admin commands
+    default: op

@@ -1,0 +1,70 @@
+jail:
+  location:
+    world: "world"
+    x: 0.0
+    y: 64.0
+    z: 0.0
+  exit_location:
+    world: "world"
+    x: 10.0
+    y: 64.0
+    z: 0.0
+  bail_amount: 8000.0
+  
+  allowed_commands:
+  # Write the commands allowed to the players inside the jail here
+    - "/bail"
+    - "/msg"
+    - "/r"
+    - "/reply"
+    - "/bal"
+    - "/pay"
+    - "/wantedlist"
+
+crime:
+  bounty_increment: 1000.0
+  crimes:
+    # Define your server's crimes here. Admins charge these via /chargecrime
+    theft:
+      enabled: false
+      bounty: 2000.0
+    assault:
+      enabled: false
+      bounty: 3000.0
+    vandalism:
+      enabled: false
+      bounty: 1500.0
+
+messages:
+  no_permission: "&cYou don't have the required permission!"
+  not_wanted: "&cThat player is not a wanted criminal."
+  already_wanted_increase: "&c[!] &e{player}&c's bounty has increased to &e${bounty}&c."
+  newly_wanted: "&c[!] &e{player}&c is now a wanted criminal! Bounty: &e${bounty}&c."
+  not_in_jail_self: "&cYou are not in jail."
+  not_in_jail_other: "&cThat player is not in jail."
+  bail_broadcast: "&e{payer} &ahas bailed out &e{criminal}&a for &e${amount}&a!"
+  bail_broadcast_self: "&e{criminal} &ahas paid their own bail of &e${amount}&a and been released!"
+  bail_not_enough_money: "&cYou don't have enough money to pay the bail of &e${amount}&c."
+  bail_transaction_failed: "&cTransaction failed."
+  pardon_full: "&aYou have been fully pardoned."
+  pardon_partial: "&aYou have been pardoned for: &e{crimes}"
+  pardon_admin_success: "&a{player} has been pardoned."
+  pardon_no_charge: "&eNo remaining charge for '{crime}' to pardon."
+  cuffs_not_wanted: "&cThat player is not a wanted criminal."
+  cuffs_received: "&aYou have received the HandCuffs"
+  cuffs_cannot_use: "&cWanted criminals cannot use citizen's arrest cuffs."
+  reload_success: "&aRealWorld configuration reloaded."
+  crime_not_found: "&cCrime '&e{crime}&c' is not defined or is disabled."
+  player_not_found: "&cPlayer '&e{player}&c' not found."
+  wantedlist_empty: "&aThe server is crime-free! No wanted criminals."
+  inmates_empty: "&aThe jail is empty! No inmates."
+  crimelog_empty: "&eNo crime log entries found."
+  crimelog_header: "&6=== Crime Log ==="
+  usage_chargecrime: "&cUsage: /chargecrime <player> <crime>"
+  usage_pardon: "&cUsage: /pardon <player> [crimeName1] [crimeName2] ..."
+  usage_realworld: "&cUsage: /realworld reload"
+  arrest_success: "&aYou have successfully arrested &e{criminal}&a and received the &e${bounty}&a bounty!"
+  arrest_success_criminal: "&cYou have been arrested and taken to jail. Your bail amount is &e${bailAmount}&c."
+  released: "&aYou have been released from jail."
+  crimelog_error: "&cError reading crime log."
+  jail_command_blocked: "&cYou cannot use that command while in jail!"
