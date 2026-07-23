@@ -55,11 +55,19 @@ public class RealWorldPlugin extends JavaPlugin {
         // Register Commands
         com.rxdwan.realworld.crime.CrimeCommands crimeCmds = new com.rxdwan.realworld.crime.CrimeCommands(this);
         getCommand("wantedlist").setExecutor(crimeCmds);
+        getCommand("inmates").setExecutor(crimeCmds);
+        getCommand("inmates").setTabCompleter(crimeCmds);
         getCommand("chargecrime").setExecutor(crimeCmds);
         getCommand("chargecrime").setTabCompleter(crimeCmds);
         getCommand("pardon").setExecutor(crimeCmds);
+        getCommand("pardon").setTabCompleter(crimeCmds);
         getCommand("cuffs").setExecutor(crimeCmds);
         getCommand("bail").setExecutor(crimeCmds);
+        getCommand("bail").setTabCompleter(crimeCmds);
+        getCommand("arrest").setExecutor(crimeCmds);
+        getCommand("arrest").setTabCompleter(crimeCmds);
+        getCommand("crimelog").setExecutor(crimeCmds);
+        getCommand("crimelog").setTabCompleter(crimeCmds);
 
         getCommand("realworld").setExecutor(new RealWorldCommands(this));
 

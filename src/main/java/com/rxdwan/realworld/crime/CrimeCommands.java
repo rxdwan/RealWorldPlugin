@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CrimeCommands implements CommandExecutor, TabCompleter {
 
@@ -43,7 +44,7 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
                 MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("wantedlist_empty"));
                 return true;
             }
-            
+
             List<String> header = List.of("Player", "Bounty", "Crimes");
             List<List<String>> rows = new ArrayList<>();
             for (WantedEntry w : wanted) {
@@ -62,7 +63,7 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
                 String crimesStr = String.join(", ", formattedCrimes);
                 rows.add(List.of("&c" + w.getPlayerName(), "&e$" + w.getBounty(), "&f" + crimesStr));
             }
-            
+
             List<String> table = TableUtil.tabulize(header, rows);
             sender.sendMessage(MessageUtil.color("&6=== Wanted Criminals ==="));
             for (String line : table) {
@@ -80,13 +81,13 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
                 MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("inmates_empty"));
                 return true;
             }
-            
+
             List<String> header = List.of("Inmate", "Bail", "Crimes");
             List<List<String>> rows = new ArrayList<>();
             for (JailManager.JailRecord record : inmates) {
                 String name = record.playerName != null ? record.playerName : "Unknown";
                 String bail = String.format("$%.2f", record.bailAmount);
-                
+
                 String crimesStr = "Unknown";
                 if (record.crimes != null && !record.crimes.isEmpty()) {
                     Map<String, Integer> counts = new HashMap<>();
@@ -103,10 +104,10 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
                     }
                     crimesStr = String.join(", ", formattedCrimes);
                 }
-                
+
                 rows.add(List.of("&c" + name, "&e" + bail, "&f" + crimesStr));
             }
-            
+
             List<String> table = TableUtil.tabulize(header, rows);
             sender.sendMessage(MessageUtil.color("&6=== Current Inmates ==="));
             for (String line : table) {
@@ -123,20 +124,20 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
                 MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("no_permission"));
                 return true;
             }
-            
+
             int limit = 20;
             if (args.length > 0) {
                 try {
                     limit = Integer.parseInt(args[0]);
                 } catch (NumberFormatException ignored) {}
             }
-            
+
             File logFile = new File(plugin.getDataFolder(), "logs/crime_log.txt");
             if (!logFile.exists() || logFile.length() == 0) {
                 MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("crimelog_empty"));
                 return true;
             }
-            
+
             List<String> lines = new ArrayList<>();
             try (BufferedReader br = new BufferedReader(new FileReader(logFile))) {
                 String line;
@@ -147,16 +148,16 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
                 sender.sendMessage(MessageUtil.getMessage("crimelog_error"));
                 return true;
             }
-            
+
             if (lines.isEmpty()) {
                 MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("crimelog_empty"));
                 return true;
             }
-            
+
             int start = Math.max(0, lines.size() - limit);
-            List<String> header = List.of("Timestamp", "Action", "Player", "Crime", "Bounty", "Extra");
+            List<String> header = List.of("Timestamp", "Action", "Player", "Crime", "Bounty", "By");
             List<List<String>> rows = new ArrayList<>();
-            
+
             for (int i = start; i < lines.size(); i++) {
                 String line = lines.get(i);
                 try {
@@ -168,13 +169,18 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
                     String crime = parts[2].replace("Crime: ", "").trim();
                     String bounty = parts[3].replace("Bounty: ", "").trim();
                     String extra = parts[4].replace("Admin: ", "").trim();
-                    
+
                     rows.add(List.of(timestamp, action, playerStr, crime, bounty, extra));
                 } catch (Exception e) {
                     continue;
                 }
             }
-            
+
+            if (rows.isEmpty()) {
+                MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("crimelog_empty"));
+                return true;
+            }
+
             sender.sendMessage(MessageUtil.getMessage("crimelog_header"));
             List<String> table = TableUtil.tabulize(header, rows);
             for (String line : table) {
@@ -222,6 +228,34 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
         }
 
         // ---------------------------------------------------------------
+        // /arrest <player> — admin command that does what cuffs do
+        // ---------------------------------------------------------------
+        if (cmdName.equals("arrest")) {
+            if (!sender.hasPermission("realworld.admin")) {
+                MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("no_permission"));
+                return true;
+            }
+            if (args.length < 1) {
+                MessageUtil.sendPrefixedMessage(sender, "&cUsage: /arrest <player>");
+                return true;
+            }
+            Player target = Bukkit.getPlayer(args[0]);
+            if (target == null) {
+                MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("player_not_found", Map.of("player", args[0])));
+                return true;
+            }
+            if (!plugin.getCrimeManager().isWanted(target.getUniqueId())) {
+                MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("cuffs_not_wanted"));
+                return true;
+            }
+            // Perform arrest — pass null for arrester (admin arrest gives no bounty payout)
+            plugin.getJailManager().jailPlayer(target, null);
+            MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("arrest_success",
+                    Map.of("criminal", target.getName(), "bounty", "0")));
+            return true;
+        }
+
+        // ---------------------------------------------------------------
         // /pardon <player> [crimes...] — admin only
         // ---------------------------------------------------------------
         if (cmdName.equals("pardon")) {
@@ -251,7 +285,7 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
                 List<String> toRemove = new ArrayList<>(Arrays.asList(args).subList(1, args.length));
                 List<String> successfullyRemoved = new ArrayList<>();
                 boolean fullyPardoned = plugin.getCrimeManager().pardonPlayerPartial(offTarget.getUniqueId(), toRemove, successfullyRemoved);
-                
+
                 // Notify about missing charges
                 List<String> tempRemoved = new ArrayList<>(successfullyRemoved);
                 for (String requested : toRemove) {
@@ -261,7 +295,7 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
                         MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("pardon_no_charge", Map.of("crime", requested)));
                     }
                 }
-                
+
                 if (fullyPardoned) {
                     plugin.getLogManager().logCrime("PARDONED", offTarget.getName(), offTarget.getUniqueId().toString(), "N/A", 0, sender.getName());
                     if (offTarget.isOnline() && offTarget.getPlayer() != null) {
@@ -280,7 +314,7 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
                     }
                 }
             }
-            
+
             MessageUtil.sendPrefixedMessage(sender, MessageUtil.getMessage("pardon_admin_success", Map.of("player", offTarget.getName())));
             return true;
         }
@@ -298,13 +332,11 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
 
             ItemStack cuffs = new ItemStack(Material.IRON_CHAIN);
             ItemMeta meta = cuffs.getItemMeta();
-            // Audit: setDisplayName, setLore, and setCustomModelData are deprecated in newer Paper versions 
-            // in favor of Adventure Components and DataComponent API, but remain functional.
             meta.setDisplayName(MessageUtil.color("&bHandcuffs"));
             meta.setLore(List.of(MessageUtil.getMessage("cuffs_lore").split("\n")));
             meta.setUnbreakable(true);
             meta.setCustomModelData(773100);
-            meta.getPersistentDataContainer().set(// changed arrest_cuffs to handcuffs in PDC
+            meta.getPersistentDataContainer().set(
                     new NamespacedKey(plugin, "handcuffs"), PersistentDataType.BYTE, (byte) 1);
             cuffs.setItemMeta(meta);
 
@@ -348,7 +380,7 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
             EconomyResponse r = plugin.getEconomy().withdrawPlayer(player, bailAmount);
             if (r.transactionSuccess()) {
                 plugin.getJailManager().releasePlayer(target, false);
-                
+
                 // Broadcast on success
                 if (player.equals(target)) {
                     String bc = MessageUtil.getMessage("bail_broadcast_self", Map.of("criminal", target.getName(), "amount", String.valueOf(bailAmount)));
@@ -372,10 +404,86 @@ public class CrimeCommands implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        String cmdName = command.getName().toLowerCase();
         List<String> completions = new ArrayList<>();
-        if (command.getName().equalsIgnoreCase("chargecrime") && args.length == 2) {
-            completions.addAll(plugin.getConfigManager().crimes.keySet());
+        String lastArg = args.length > 0 ? args[args.length - 1].toLowerCase() : "";
+
+        // /chargecrime <player> <crime>
+        if (cmdName.equals("chargecrime") && sender.hasPermission("realworld.admin")) {
+            if (args.length == 1) {
+                // Suggest online player names
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (p.getName().toLowerCase().startsWith(lastArg)) {
+                        completions.add(p.getName());
+                    }
+                }
+            } else if (args.length == 2) {
+                // Suggest only ENABLED crimes
+                for (Map.Entry<String, com.rxdwan.realworld.config.ConfigManager.CrimeConfig> entry
+                        : plugin.getConfigManager().crimes.entrySet()) {
+                    if (entry.getValue().enabled && entry.getKey().toLowerCase().startsWith(lastArg)) {
+                        completions.add(entry.getKey());
+                    }
+                }
+            }
         }
+
+        // /pardon <player> [crime...]
+        if (cmdName.equals("pardon") && sender.hasPermission("realworld.admin")) {
+            if (args.length == 1) {
+                // Suggest wanted players
+                for (WantedEntry w : plugin.getCrimeManager().getAllWanted()) {
+                    if (w.getPlayerName().toLowerCase().startsWith(lastArg)) {
+                        completions.add(w.getPlayerName());
+                    }
+                }
+            } else {
+                // Suggest crime names the player has been charged with
+                org.bukkit.OfflinePlayer offTarget = Bukkit.getOfflinePlayer(args[0]);
+                WantedEntry entry = plugin.getCrimeManager().getWantedEntry(offTarget.getUniqueId());
+                if (entry != null) {
+                    for (String crime : new LinkedHashSet<>(entry.getCrimes())) {
+                        if (crime.toLowerCase().startsWith(lastArg)) {
+                            completions.add(crime);
+                        }
+                    }
+                }
+            }
+        }
+
+        // /arrest <player>
+        if (cmdName.equals("arrest") && sender.hasPermission("realworld.admin")) {
+            if (args.length == 1) {
+                // Suggest only online wanted players
+                for (WantedEntry w : plugin.getCrimeManager().getAllWanted()) {
+                    Player online = Bukkit.getPlayer(w.getPlayerUUID());
+                    if (online != null && online.getName().toLowerCase().startsWith(lastArg)) {
+                        completions.add(online.getName());
+                    }
+                }
+            }
+        }
+
+        // /bail [player]
+        if (cmdName.equals("bail")) {
+            if (args.length == 1) {
+                // Suggest online jailed players
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (p.getPersistentDataContainer().has(new NamespacedKey(plugin, "jailed"), PersistentDataType.BYTE)
+                            && p.getName().toLowerCase().startsWith(lastArg)) {
+                        completions.add(p.getName());
+                    }
+                }
+            }
+        }
+
+        // /crimelog [number]
+        if (cmdName.equals("crimelog") && sender.hasPermission("realworld.admin")) {
+            if (args.length == 1) {
+                completions.addAll(List.of("10", "20", "50", "100"));
+            }
+        }
+
         return completions;
     }
 }

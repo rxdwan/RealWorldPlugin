@@ -31,6 +31,9 @@ commands:
   crimelog:
     description: View the crime log
     permission: realworld.admin
+  arrest:
+    description: Admin command to directly arrest a wanted player
+    permission: realworld.admin
 
 permissions:
   realworld.commands:
