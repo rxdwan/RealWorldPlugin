@@ -38,11 +38,15 @@ The plugin is highly configurable through `config.yml`. You can define custom cr
 *   Vault
 *   A compatible economy plugin like EssentialsX
 
-## Installation
-1. Drop `RealWorld.jar` into your server's `plugins` folder.
-2. Ensure you have Vault and an economy provider installed.
-3. Restart the server to generate the configuration files.
-4. Set the jail location and exit location in the generated `config.yml`.
+## Building from Source
+
+Requires Java 17+ and Maven (or `mvnd` for faster builds).
+
+```bash
+git clone https://github.com/rxdwan/RealWorldPlugin.git
+cd RealWorldPlugin
+mvnd clean package
+```
 
 ## License
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
