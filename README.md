@@ -41,6 +41,8 @@ The plugin is highly configurable through `config.yml`. You can define custom cr
 ## Screenshots
 <center>
     <img src="handcuffs in-game screenshot.png" width="400" alt="image of handcuffs as a dropped item in minecraft">
+    <br>
+    Handcuffs as a dropped item in Minecraft
 </center>
 
 ## Building from Source
