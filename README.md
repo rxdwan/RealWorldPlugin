@@ -38,6 +38,11 @@ The plugin is highly configurable through `config.yml`. You can define custom cr
 *   Vault
 *   A compatible economy plugin like EssentialsX
 
+## Screenshots
+<center>
+    <img src="handcuffs in-game screenshot.png" width="400" alt="image of handcuffs as a dropped item in minecraft">
+</center>
+
 ## Building from Source
 
 Requires Java 17+ and Maven (or `mvnd` for faster builds).
