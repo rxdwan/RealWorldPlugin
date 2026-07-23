@@ -1,6 +1,6 @@
 # RealWorld
 
-RealWorld is a feature-rich roleplay crime and jail system for Minecraft servers. It allows administrators to charge players with specific crimes, adding a bounty to their heads. Citizens can then enforce the law using Citizen's Arrest Cuffs to send wanted criminals directly to jail and claim the bounty.
+RealWorld is a feature-rich roleplay crime and jail system for **Paper 1.21+** Minecraft servers. It allows administrators to charge players with specific crimes, adding a bounty to their heads. Citizens can then enforce the law using Citizen's Arrest Cuffs to send wanted criminals directly to jail and claim the bounty.
 
 ## Disclaimer
 This project is made with the help of [Antigravity IDE](https://antigravity.google/). This is a vibecoded project!
