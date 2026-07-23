@@ -45,4 +45,4 @@ The plugin is highly configurable through `config.yml`. You can define custom cr
 4. Set the jail location and exit location in the generated `config.yml`.
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for details.
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
